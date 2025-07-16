@@ -1,0 +1,52 @@
+[
+    {
+        "name": "Bluetooth Speaker",
+        "barcode": "1234567890",
+        "price": 29.99
+    },
+    {
+        "name": "USB-C Cable",
+        "barcode": "1230",
+        "price": 3.99
+    },
+    {
+        "name": "The Barefoot Investor - Scott Pape",
+        "barcode": "9780730397533",
+        "price": 15.00
+    },
+    {
+        "name": "The Highlights - The Weeknd",
+        "barcode": "602435734439",
+        "price": 11.95
+    },
+    {
+        "name": "So Close To What - Tate McRae",
+        "barcode": "198028850827",
+        "price": 22.99
+    },
+    {
+        "name": "Found Heaven - Conan Gray",
+        "barcode": "602465166064",
+        "price": 24.99
+    },
+    {
+        "name": "Dua Lipa - Dua Lipa",
+        "barcode": "190295906269",
+        "price": 15.99
+    },
+    {
+        "name": "Future Nostalgia - Dua Lipa",
+        "barcode": "190295286101",
+        "price": 23.99
+    },
+    {
+        "name": "Radical Optimism - Dua Lipa",
+        "barcode": "5054197943478",
+        "price": 24.99
+    },
+    {
+        "name": "YSL MYSLF Eau de Parfum 100ml",
+        "barcode": "3614273852814",
+        "price": 159.99
+    }
+]
