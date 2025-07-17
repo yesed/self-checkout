@@ -5,6 +5,8 @@ import keyboard
 import json
 import time
 
+# VERSION 1.1
+
 root = Tk()
 root.title("Self-Checkout")
 root.geometry("800x480")
@@ -36,9 +38,84 @@ pay_frame=None
 pay_panel_open = False
 
 
+def create_popup(parent, title="", geometry="200x75", heading="", keypad=False, button=False, button_text="", button_command=None):
+    global popup
+    popup = Toplevel(parent)
+    popup.title(title)
+    popup.geometry(geometry)
+    popup.attributes('-topmost', True)
+    #popup.eval('tk::PlaceWindow . center')
+    popup.transient(parent)
+    popup.focus_force()
+    try:
+        alert.attributes("-toolwindow",True)
+    except:
+        pass
+
+    popup.grid_columnconfigure(0, weight=1)
+    popup.grid_columnconfigure(2, weight=1)
+
+    label1 = Label(popup, text=heading, font=('none', 10, 'bold'))
+    label1.grid(row=0, column=1, padx=5, pady=5)
+
+    result = StringVar()
+
+    if button:
+        button1 = Button(popup, text=button_text, command=button_command)
+        button1.grid(row=1, column=1)
+
+    if keypad:
+        input1 = Text(popup, width=23, height=1)
+        input1.grid(row=1, column=1, padx=5)
+        input1.focus()
+
+        def entry(key):
+            input1.insert(END, str(key))
+
+        def enter():
+            result.set(input1.get("1.0", "end-1c").strip())
+            popup.destroy()
+
+        keypad = Frame(popup)
+        keypad.grid(row=2,column=1,pady=10)
+        key1 = Button(keypad,text="1",command=lambda:entry(1),height=2,width=5,bg="gray",fg="white")
+        key1.grid(row=0,column=0,padx=2,pady=2)
+        key2 = Button(keypad,text="2",command=lambda:entry(2),height=2,width=5,bg="gray",fg="white")
+        key2.grid(row=0,column=1,padx=2,pady=2)
+        key3 = Button(keypad,text="3",command=lambda:entry(3),height=2,width=5,bg="gray",fg="white")
+        key3.grid(row=0,column=2,padx=2,pady=2)
+        key4 = Button(keypad,text="4",command=lambda:entry(4),height=2,width=5,bg="gray",fg="white")
+        key4.grid(row=1,column=0,padx=2,pady=2)
+        key5 = Button(keypad,text="5",command=lambda:entry(5),height=2,width=5,bg="gray",fg="white")
+        key5.grid(row=1,column=1,padx=2,pady=2)
+        key6 = Button(keypad,text="6",command=lambda:entry(6),height=2,width=5,bg="gray",fg="white")
+        key6.grid(row=1,column=2,padx=2,pady=2)
+        key7 = Button(keypad,text="7",command=lambda:entry(7),height=2,width=5,bg="gray",fg="white")
+        key7.grid(row=2,column=0,padx=2,pady=2)
+        key8 = Button(keypad,text="8",command=lambda:entry(8),height=2,width=5,bg="gray",fg="white")
+        key8.grid(row=2,column=1,padx=2,pady=2)
+        key9 = Button(keypad,text="9",command=lambda:entry(9),height=2,width=5,bg="gray",fg="white")
+        key9.grid(row=2,column=2,padx=2,pady=2)
+        key0 = Button(keypad,text="0",command=lambda:entry(0),height=2,width=5,bg="gray",fg="white")
+        key0.grid(row=3,column=1,padx=2,pady=2)
+        keyClear = Button(keypad,text="Clear",command=lambda:input1.delete("1.0","end"),height=2,width=5,bg="gray",fg="white")
+        keyClear.grid(row=3,column=0,padx=2,pady=2)
+        keyEnter = Button(keypad,text="Enter",command=enter,height=2,width=5,bg="gray",fg="white")
+        keyEnter.grid(row=3,column=2,padx=2,pady=2)
+
+    popup.wait_visibility()
+    x = root.winfo_x() + root.winfo_width()//2 - popup.winfo_width()//2
+    y = root.winfo_y() + root.winfo_height()//2 - popup.winfo_height()//2
+    popup.geometry(f"+{x}+{y}")
+    parent.wait_window(popup)
+    popup.destroy()
+    popup.update()
+    return result.get()
+
+
 def add_item(barcode):
     code_found = False
-    global total_price
+    global total_price,accept_input
     if accept_input:
         for item in items:
             if item["barcode"] == barcode:
@@ -63,6 +140,7 @@ def add_item(barcode):
                     total_price += item["price"]
                     price_label.config(text=f"Total: ${total_price:.2f}")
                     item_count.config(text=f"{len(cart)} Items")
+                total_price = round(total_price, 2)
                 print(f"NEW TOTAL: {total_price}")
                 
         if not code_found:
@@ -71,8 +149,12 @@ def add_item(barcode):
             alert.title("Alert")
             alert.geometry("200x75")
             alert.attributes("-topmost",True)
-            alert.attributes("-toolwindow",True)
             alert.eval('tk::PlaceWindow . center')
+            try:
+                alert.attributes("-toolwindow",True)
+            except:
+                None
+            
             label1 = Label(alert,text=f"Item '{barcode}'\nNot Found!",font=('none',10,'bold'))
             button1 = Button(alert,text="Close",command=lambda:alert.destroy())
             label1.pack()
@@ -81,57 +163,11 @@ def add_item(barcode):
 
 def key_barcode():
     global accept_input
-    keyscrn = Tk()
-    keyscrn.title("")
-    keyscrn.geometry("200x250")
-    keyscrn.attributes('-topmost', True)
-    keyscrn.attributes("-toolwindow", True)
-    keyscrn.eval('tk::PlaceWindow . center')
-
-    def on_close():
-        global accept_input
-        print("Close scrn")
+    accept_input = False
+    value = create_popup(root,"","200x250","Enter Barcode:",True)
+    if value:
         accept_input = True
-        keyscrn.destroy()
-    keyscrn.protocol("WM_DELETE_WINDOW", on_close)
-
-    def entry(key):
-        input1.insert(END,key)
-    def enter():
-        entry = input1.get("1.0","end-1c").strip()
-        if entry:
-            add_item(entry)
-        
-    title1 = Label(keyscrn,text="Enter Barcode:",font=('none',10,'bold'))
-    title1.grid(row=0,column=0,padx=5,pady=5)
-    input1 = Text(keyscrn,width=23,height=1)
-    input1.grid(row=1,column=0,padx=5)
-    keypad = Frame(keyscrn)
-    keypad.grid(row=2,column=0,pady=10)
-    key1 = Button(keypad,text="1",command=lambda:entry(1),height=2,width=5,bg="gray",fg="white")
-    key1.grid(row=0,column=0,padx=2,pady=2)
-    key2 = Button(keypad,text="2",command=lambda:entry(2),height=2,width=5,bg="gray",fg="white")
-    key2.grid(row=0,column=1,padx=2,pady=2)
-    key3 = Button(keypad,text="3",command=lambda:entry(3),height=2,width=5,bg="gray",fg="white")
-    key3.grid(row=0,column=2,padx=2,pady=2)
-    key4 = Button(keypad,text="4",command=lambda:entry(4),height=2,width=5,bg="gray",fg="white")
-    key4.grid(row=1,column=0,padx=2,pady=2)
-    key5 = Button(keypad,text="5",command=lambda:entry(5),height=2,width=5,bg="gray",fg="white")
-    key5.grid(row=1,column=1,padx=2,pady=2)
-    key6 = Button(keypad,text="6",command=lambda:entry(6),height=2,width=5,bg="gray",fg="white")
-    key6.grid(row=1,column=2,padx=2,pady=2)
-    key7 = Button(keypad,text="7",command=lambda:entry(7),height=2,width=5,bg="gray",fg="white")
-    key7.grid(row=2,column=0,padx=2,pady=2)
-    key8 = Button(keypad,text="8",command=lambda:entry(8),height=2,width=5,bg="gray",fg="white")
-    key8.grid(row=2,column=1,padx=2,pady=2)
-    key9 = Button(keypad,text="9",command=lambda:entry(9),height=2,width=5,bg="gray",fg="white")
-    key9.grid(row=2,column=2,padx=2,pady=2)
-    key0 = Button(keypad,text="0",command=lambda:entry(0),height=2,width=5,bg="gray",fg="white")
-    key0.grid(row=3,column=1,padx=2,pady=2)
-    keyClear = Button(keypad,text="Clear",command=lambda:input1.delete("1.0","end"),height=2,width=5,bg="gray",fg="white")
-    keyClear.grid(row=3,column=0,padx=2,pady=2)
-    keyEnter = Button(keypad,text="Enter",command=enter,height=2,width=5,bg="gray",fg="white")
-    keyEnter.grid(row=3,column=2,padx=2,pady=2)
+        add_item(value)
 
 def void_item():
     global item_list,total_price,cart
@@ -158,69 +194,36 @@ def void_item():
         print(cart)
 
 def custom_discount():
-    global discount_percent
-    discountscrn = Tk()
-    discountscrn.title("")
-    discountscrn.geometry("200x250")
-    discountscrn.eval('tk::PlaceWindow . center')
-
-    def entry(key):
-        input1.insert(END,key)
-    def enter():
+    global accept_input
+    accept_input = False
+    value = create_popup(root,"","200x250","Enter Discount Amount (%):",True)
+    if value:
         global discounts,discount_percent,total_price
-        entryAmount = input1.get("1.0","end-1c")
-        if entryAmount:
-            discounts += int(entryAmount)/100
-            print(discounts)
-            for i in cart:
-                for item in items:
-                    if item["barcode"] == i:
-                        total_price -= item["price"]
-                        total_price += round(item["price"]-item["price"]*discounts,2)
-                        print(total_price)
-                        
+        discounts += int(value)/100
+        print(discounts)
+        for i in cart:
+            for item in items:
+                if item["barcode"] == i:
+                    total_price -= item["price"]
+                    total_price += round(item["price"]-item["price"]*discounts,2)
+                    print(total_price)
+        if discounts > 0:
             discount_percent.config(text=f"Discounts: -{discounts*100}%")
-            price_label.config(text=f"Total: ${total_price:.2f}")
-        discountscrn.destroy()
-
-    title1 = Label(discountscrn,text="Enter Discount Amount (%):",font=('none',10,'bold'))
-    title1.grid(row=0,column=0,padx=5,pady=5)
-    input1 = Text(discountscrn,width=23,height=1)
-    input1.grid(row=1,column=0,padx=5)
-    keypad = Frame(discountscrn)
-    keypad.grid(row=2,column=0,pady=10)
-    key1 = Button(keypad,text="1",command=lambda:entry(1),height=2,width=5,bg="gray",fg="white")
-    key1.grid(row=0,column=0,padx=2,pady=2)
-    key2 = Button(keypad,text="2",command=lambda:entry(2),height=2,width=5,bg="gray",fg="white")
-    key2.grid(row=0,column=1,padx=2,pady=2)
-    key3 = Button(keypad,text="3",command=lambda:entry(3),height=2,width=5,bg="gray",fg="white")
-    key3.grid(row=0,column=2,padx=2,pady=2)
-    key4 = Button(keypad,text="4",command=lambda:entry(4),height=2,width=5,bg="gray",fg="white")
-    key4.grid(row=1,column=0,padx=2,pady=2)
-    key5 = Button(keypad,text="5",command=lambda:entry(5),height=2,width=5,bg="gray",fg="white")
-    key5.grid(row=1,column=1,padx=2,pady=2)
-    key6 = Button(keypad,text="6",command=lambda:entry(6),height=2,width=5,bg="gray",fg="white")
-    key6.grid(row=1,column=2,padx=2,pady=2)
-    key7 = Button(keypad,text="7",command=lambda:entry(7),height=2,width=5,bg="gray",fg="white")
-    key7.grid(row=2,column=0,padx=2,pady=2)
-    key8 = Button(keypad,text="8",command=lambda:entry(8),height=2,width=5,bg="gray",fg="white")
-    key8.grid(row=2,column=1,padx=2,pady=2)
-    key9 = Button(keypad,text="9",command=lambda:entry(9),height=2,width=5,bg="gray",fg="white")
-    key9.grid(row=2,column=2,padx=2,pady=2)
-    key0 = Button(keypad,text="0",command=lambda:entry(0),height=2,width=5,bg="gray",fg="white")
-    key0.grid(row=3,column=1,padx=2,pady=2)
-    keyClear = Button(keypad,text="Clear",command=lambda:input1.delete("1.0","end"),height=2,width=5,bg="gray",fg="white")
-    keyClear.grid(row=3,column=0,padx=2,pady=2)
-    keyEnter = Button(keypad,text="Enter",command=enter,height=2,width=5,bg="gray",fg="white")
-    keyEnter.grid(row=3,column=2,padx=2,pady=2)
+        else:
+            discount_percent.config(text="")
+        price_label.config(text=f"Total: ${total_price:.2f}")
+    accept_input = True
 
 def close_lane():
     lane_off=Tk()
     lane_off.title("")
     lane_off.geometry("300x400")
     lane_off.attributes("-topmost",True)
-    lane_off.attributes("-toolwindow", True)
     lane_off.eval('tk::PlaceWindow . center')
+    try:
+        alert.attributes("-toolwindow",True)
+    except:
+        None
 
     label1 = Label(lane_off,text="Lane Closed",font=('none',20,'bold'))
     label1.grid(row=0,column=0,padx=70,pady=50,sticky=NSEW)
@@ -265,57 +268,14 @@ def admin_panel():
     
 def assist_login():
     global accept_input
-    assistscrn = Tk()
-    assistscrn.title("")
-    assistscrn.geometry("200x250")
-    assistscrn.attributes('-topmost', True)
-    assistscrn.attributes("-toolwindow", True)
-    assistscrn.eval('tk::PlaceWindow . center')
     accept_input = False
-
-    def entry(key):
-        input1.insert(END,key)
-    def enter():
-        entry = input1.get("1.0", "end-1c").strip()
-        print("CHECK")
-        with open("login.json", "r") as f:
-            data = json.load(f)
-        print(data.get(entry))
-        if data.get(entry) == "Staff":
-            admin_panel()
-            assistscrn.destroy()
-    
-    title1 = Label(assistscrn,text="Scan or Enter staff code:",font=('none',10,'bold'))
-    title1.grid(row=0,column=0,padx=5,pady=5)
-    input1 = Text(assistscrn,width=23,height=1)
-    input1.grid(row=1,column=0,padx=5)
-    input1.focus()
-    keypad = Frame(assistscrn)
-    keypad.grid(row=2,column=0,pady=10)
-    key1 = Button(keypad,text="1",command=lambda:entry(1),height=2,width=5,bg="gray",fg="white")
-    key1.grid(row=0,column=0,padx=2,pady=2)
-    key2 = Button(keypad,text="2",command=lambda:entry(2),height=2,width=5,bg="gray",fg="white")
-    key2.grid(row=0,column=1,padx=2,pady=2)
-    key3 = Button(keypad,text="3",command=lambda:entry(3),height=2,width=5,bg="gray",fg="white")
-    key3.grid(row=0,column=2,padx=2,pady=2)
-    key4 = Button(keypad,text="4",command=lambda:entry(4),height=2,width=5,bg="gray",fg="white")
-    key4.grid(row=1,column=0,padx=2,pady=2)
-    key5 = Button(keypad,text="5",command=lambda:entry(5),height=2,width=5,bg="gray",fg="white")
-    key5.grid(row=1,column=1,padx=2,pady=2)
-    key6 = Button(keypad,text="6",command=lambda:entry(6),height=2,width=5,bg="gray",fg="white")
-    key6.grid(row=1,column=2,padx=2,pady=2)
-    key7 = Button(keypad,text="7",command=lambda:entry(7),height=2,width=5,bg="gray",fg="white")
-    key7.grid(row=2,column=0,padx=2,pady=2)
-    key8 = Button(keypad,text="8",command=lambda:entry(8),height=2,width=5,bg="gray",fg="white")
-    key8.grid(row=2,column=1,padx=2,pady=2)
-    key9 = Button(keypad,text="9",command=lambda:entry(9),height=2,width=5,bg="gray",fg="white")
-    key9.grid(row=2,column=2,padx=2,pady=2)
-    key0 = Button(keypad,text="0",command=lambda:entry(0),height=2,width=5,bg="gray",fg="white")
-    key0.grid(row=3,column=1,padx=2,pady=2)
-    keyClear = Button(keypad,text="Clear",command=lambda:input1.delete("1.0","end"),height=2,width=5,bg="gray",fg="white")
-    keyClear.grid(row=3,column=0,padx=2,pady=2)
-    keyEnter = Button(keypad,text="Enter",command=enter,height=2,width=5,bg="gray",fg="white")
-    keyEnter.grid(row=3,column=2,padx=2,pady=2)
+    value = create_popup(root,"","200x250","Scan or Enter staff code:",True)
+    with open("login.json", "r") as f:
+        data = json.load(f)
+    print(data.get(value))
+    if data.get(value) == "Staff":
+        admin_panel()
+    accept_input = True
 
 def payment():
     global item_display,main_frame,accept_input,close_lane
@@ -343,12 +303,8 @@ def payment():
         accept_input = True
 
     def complete_payment():
-        global cardscrn,cashscrn,accept_input,cart,total_price,discounts
-        try:
-            cardscrn.destroy()
-        except:
-            cashscrn.destroy()
-        
+        global popup,accept_input,cart,total_price,discounts
+        popup.destroy()
         pay_frame.grid_forget()
         complete = Frame(root,width=550,bg="lightgray")
         complete.grid(row=1,column=0,sticky='nesw')
@@ -378,33 +334,10 @@ def payment():
         back()
     
     def card():
-        global cardscrn
-        cardscrn = Tk()
-        cardscrn.title("")
-        cardscrn.geometry("200x85")
-        cardscrn.attributes("-topmost",True)
-        cardscrn.attributes("-toolwindow",True)
-        cardscrn.eval('tk::PlaceWindow . center')
-
-        label1 = Label(cardscrn,text="Follow pinpad prompts\nto finalise payment",font=('none',10,'bold'))
-        button1 = Button(cardscrn,text="Complete",command=complete_payment)
-        label1.pack(pady=5)
-        button1.pack(pady=5)
+        create_popup(root,geometry="200x85",title="",heading="Follow pinpad prompts\nto finalise payment",button=True,button_text="Complete",button_command=complete_payment)
 
     def cash():
-        global cashscrn
-        cashscrn = Tk()
-        cashscrn.title("")
-        cashscrn.geometry("200x85")
-        cashscrn.attributes("-topmost",True)
-        cashscrn.attributes("-toolwindow",True)
-        cashscrn.eval('tk::PlaceWindow . center')
-
-        label1 = Label(cashscrn,text="Please insert notes\nand coins",font=('none',10,'bold'))
-        button1 = Button(cashscrn,text="Complete",command=complete_payment)
-        label1.pack(pady=5)
-        button1.pack(pady=5)
-
+        create_popup(root,geometry="200x85",title="",heading="Please insert notes\nand coins",button=True,button_text="Complete",button_command=complete_payment)
     
     accept_input = False
     scrnTitle = Label(pay_frame,text="Select Payment Method",bg="lightgray",font=('none',20,'bold'))

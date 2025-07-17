@@ -1,9 +1,9 @@
 {
-    "store_name": "JB HI-FI",
+    "store_name": "Kmart",
     "currency": "$",
     "receipt_footer": "Thanks for shopping at Kmart",
-    "logo": "assets/logo1.png",
-    "theme_colour": "#FFD40F",
-    "accept_cash": "False",
+    "logo": "assets/logo.png",
+    "theme_colour": "#de1024",
+    "accept_cash": "True",
     "accept_card": "True"
 }

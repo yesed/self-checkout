@@ -1,0 +1,5 @@
+UPDATES FOR VERSION 1.1 OF SELF-CHECKOUT
+
+- Fixed total price rounding bug
+- Fixed toolwindow error for non-windows OS
+- Fixed popups not appearing correctly
