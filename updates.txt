@@ -1,4 +1,5 @@
 UPDATES FOR VERSION 1.3 OF SELF-CHECKOUT
 
 - Fixed staff assistance button panel and logout button conflict
-- Moved item not found alert to create_popup(
+- Moved item not found alert to create_popup()
+- Added fullscreen on start

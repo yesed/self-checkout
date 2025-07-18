@@ -10,6 +10,7 @@ import time
 root = Tk()
 root.title("Self-Checkout")
 root.geometry("800x480")
+root.attributes("-fullscreen",True)
 
 # DICTIONARIES
 items = None
