@@ -5,7 +5,7 @@ import keyboard
 import json
 import time
 
-# VERSION 1.2
+# VERSION 1.3
 
 root = Tk()
 root.title("Self-Checkout")
@@ -143,21 +143,7 @@ def add_item(barcode):
                 print(f"NEW TOTAL: {total_price}")
                 
         if not code_found:
-            print(f"Item '{barcode}' Not found!")
-            alert = Tk()
-            alert.title("Alert")
-            alert.geometry("200x75")
-            alert.attributes("-topmost",True)
-            alert.eval('tk::PlaceWindow . center')
-            try:
-                alert.attributes("-toolwindow",True)
-            except:
-                None
-            
-            label1 = Label(alert,text=f"Item '{barcode}'\nNot Found!",font=('none',10,'bold'))
-            button1 = Button(alert,text="Close",command=lambda:alert.destroy())
-            label1.pack()
-            button1.pack(pady=5)
+            create_popup(root,"Alert","200x85",f"Item '{barcode}'\nNot Found!",button=True,button_text="Close",button_command=lambda:popup.destroy())
             
 
 def key_barcode():
@@ -249,7 +235,7 @@ def admin_panel():
     
     scrnTitle = Label(admin_frame,text="Staff Assistance Panel",bg="lightgray",font=('none',20,'bold'))
     scrnTitle.grid(row=0,column=0,padx=10,pady=10)
-    button_panel = Frame(admin_frame,bg="lightgray",width=530,height=230)
+    button_panel = Frame(admin_frame,bg="lightgray",width=530,height=150)
     button_panel.grid(row=1,column=0,padx=10)
     button_panel.grid_propagate(False)
 
@@ -266,8 +252,8 @@ def admin_panel():
 
     button_panel.grid_columnconfigure(5, weight=1)
     button_panel.grid_rowconfigure(2, weight=1)
-    logout = Button(button_panel,text="Logout/Exit >",command=logout,bg="red",fg="white",height=3,width=14)
-    logout.grid(row=3,column=7,padx=10,pady=10,sticky=SE)
+    logout = Button(admin_frame,text="Logout/Exit >",command=logout,bg="red",fg="white",height=3,width=14)
+    logout.grid(row=2,column=0,padx=10,pady=10,sticky=SE)
     
 def assist_login():
     global accept_input
