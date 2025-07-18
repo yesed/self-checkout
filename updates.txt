@@ -1,5 +1,6 @@
-UPDATES FOR VERSION 1.1 OF SELF-CHECKOUT
+UPDATES FOR VERSION 1.2 OF SELF-CHECKOUT
 
-- Fixed total price rounding bug
-- Fixed toolwindow error for non-windows OS
-- Fixed popups not appearing correctly
+- Fixed item list sizing to fit embedded platform
+- Fixed 'Pay Now' button sizing to fit embedded platform
+- Fixed all keypad popup prompt sizing to fit embedded platform
+- Added enter and exit fullscreen button in staff assistance panel

@@ -5,7 +5,7 @@ import keyboard
 import json
 import time
 
-# VERSION 1.1
+# VERSION 1.2
 
 root = Tk()
 root.title("Self-Checkout")
@@ -44,7 +44,6 @@ def create_popup(parent, title="", geometry="200x75", heading="", keypad=False, 
     popup.title(title)
     popup.geometry(geometry)
     popup.attributes('-topmost', True)
-    #popup.eval('tk::PlaceWindow . center')
     popup.transient(parent)
     popup.focus_force()
     try:
@@ -164,7 +163,7 @@ def add_item(barcode):
 def key_barcode():
     global accept_input
     accept_input = False
-    value = create_popup(root,"","200x250","Enter Barcode:",True)
+    value = create_popup(root,"","220x275","Enter Barcode:",True)
     if value:
         accept_input = True
         add_item(value)
@@ -196,7 +195,7 @@ def void_item():
 def custom_discount():
     global accept_input
     accept_input = False
-    value = create_popup(root,"","200x250","Enter Discount Amount (%):",True)
+    value = create_popup(root,"","220x275","Enter Discount Amount (%):",True)
     if value:
         global discounts,discount_percent,total_price
         discounts += int(value)/100
@@ -257,11 +256,15 @@ def admin_panel():
     void_btn = Button(button_panel,text="Void Item",command=void_item,bg="gray",fg="white",height=3,width=7)
     void_btn.grid(row=0,column=0,padx=5,pady=5)
     apply_discount = Button(button_panel,text="Apply\nDiscount",command=custom_discount,bg="gray",fg="white",height=3,width=7)
-    apply_discount.grid(row=0,column=2,padx=5,pady=5)
+    apply_discount.grid(row=0,column=1,padx=5,pady=5)
     close_lane = Button(button_panel,text="⛔\nClose\nLane",command=close_lane,bg="gray",fg="white",height=3,width=7)
-    close_lane.grid(row=0,column=3,pady=5,padx=5)
+    close_lane.grid(row=0,column=2,pady=5,padx=5)
+    exit_fullscrn = Button(button_panel,text="Exit\nFullscreen",command=lambda:root.attributes("-fullscreen",False),bg="gray",fg="white",height=3,width=7)
+    exit_fullscrn.grid(row=0,column=3,pady=5,padx=5)
+    enter_fullscrn = Button(button_panel,text="Enter\nFullscreen",command=lambda:root.attributes("-fullscreen",True),bg="gray",fg="white",height=3,width=7)
+    enter_fullscrn.grid(row=0,column=4,pady=5,padx=5)
 
-    button_panel.grid_columnconfigure(4, weight=1)
+    button_panel.grid_columnconfigure(5, weight=1)
     button_panel.grid_rowconfigure(2, weight=1)
     logout = Button(button_panel,text="Logout/Exit >",command=logout,bg="red",fg="white",height=3,width=14)
     logout.grid(row=3,column=7,padx=10,pady=10,sticky=SE)
@@ -269,7 +272,7 @@ def admin_panel():
 def assist_login():
     global accept_input
     accept_input = False
-    value = create_popup(root,"","200x250","Scan or Enter staff code:",True)
+    value = create_popup(root,"","220x275","Scan or Enter staff code:",True)
     with open("login.json", "r") as f:
         data = json.load(f)
     print(data.get(value))
@@ -400,11 +403,11 @@ def main():
     status_colourbar = Frame(item_display, width=530,height=10,bg="green")
     status_colourbar.grid(row=3,column=0,columnspan=3,pady=10,sticky=S)
 
-    item_list = Listbox(root,width=40,height=19)
+    item_list = Listbox(root,width=30,height=17)
     item_list.grid(row=1,column=2,padx=3)
     price_label = Label(root,text="Total: $0.00",font=('none',15,'normal'))
     price_label.grid(row=3, column=2)
-    pay_button = Button(root,text="Pay Now",command=payment,bg=store_config['theme_colour'],fg="white",width=19,height=2,font=("none",15,"bold"))
+    pay_button = Button(root,text="Pay Now",command=payment,bg=store_config['theme_colour'],fg="white",width=15,height=2,font=("none",15,"bold"))
     pay_button.grid(row=4,column=2)
 
     bottom_row = Frame(root,width=550,height=100)
